@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/add_file.png</file>
+        <file>icons/EPROM.png</file>
+        <file>icons/OFF.png</file>
+        <file>binarys/romstartm045.bin</file>
+        <file>binarys/romstartm046.bin</file>
+        <file>binarys/romstartm047.bin</file>
+        <file>icons/preview.png</file>
+        <file>icons/Symbol.jpg</file>
+    </qresource>
+</RCC>
