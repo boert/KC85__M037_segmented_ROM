@@ -84,8 +84,11 @@ Zusätzlich werden die Dateien "EPROM_M04?.bin_ROM?" erstellt. Diese sind für d
 # Quellenverweise
 
 [1] KC85/5 System-Handbuch CAOS 4.6 bis 4.8, 3.8.2 Dateiaufbau
+
 [2] ZX7, Einar Saukas, https://worldofspectrum.org/infoseekid.cgi?id=0027996
+
 [3] JKCEMU, Jens Müller, http://www.jens-mueller.org/jkcemu/
+
 [4] KC-Bildformate intern, Ralf Kästner, KC-News 2/95, https://kcclub.de/index.php?option=com_content&view=article&id=123&Itemid=135 
 
 
