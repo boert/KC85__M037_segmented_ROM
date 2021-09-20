@@ -4,6 +4,8 @@
 
 * Typestar 90 und RAMDOS V2.0
 
+Hier gibt es weitere Informationen zu Typestar: http://www.mpm-kc85.de/html/m033_typestar.htm
+
 
 ## M047__12_Spiele_KC855
 
