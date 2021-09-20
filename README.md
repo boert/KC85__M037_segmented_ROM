@@ -10,3 +10,11 @@ EPROM-Images            : vorgefertigt, für Emulator und EPROM-Brenner
 Generator-Software      : um eigene EPROM-Images zu erstellen (C++, Qt5)
 
 ROMSTART                : Menüsoftware, die auf dem Modul läuft (Z80-Assembler)
+
+
+Dieses Projekt nutzt u.a. folgende Software:
+- KiCad, https://www.kicad.org/
+- pasmo, https://pasmo.speccy.org/
+- Python, https://www.python.org/
+- Qt, https://www.qt.io/
+- ZX7, https://spectrumcomputing.co.uk/entry/27996/ZX-Spectrum/ZX7
