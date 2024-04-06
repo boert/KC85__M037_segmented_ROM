@@ -1,13 +1,18 @@
 ; vim: set tabstop=8 noexpandtab:
 
-; ROMSTART-Software für M045/M046/M047
-; by Bert Lange, 12/2020
+; ROMSTART-Software für M045/M046/M047 und M062 (32k/64k)
+; by Boert  2020, 2024
 
 
-; für Anzeige und Modulsteuerworte relevant:
-;BLOCKS	EQU	256	; M045
-;BLOCKS	EQU	512	; M046
-BLOCKS	EQU	1024	; M047
+; für Anzeige und Modulsteuerworte relevant
+; ACHTUNG: jeweils nur eins aktivieren!
+;M045	  EQU	0
+;M046	  EQU	0 
+;M047	  EQU	0
+;M062_32k EQU	0
+;M062_64k EQU	0
+; Alternativ: Modultyp wird inkludiert:
+include modul.inc
 
 
 ; genutzte Systemzellen:
@@ -94,6 +99,7 @@ FARB	EQU	0B7D6h
 JUMPI	EQU	00010h
 VSWITCH	EQU	0400Eh
 VEND	EQU	04032h
+VLENGTH	EQU	VEND - VSWITCH
 HCOPY	EQU	00010h
 
 
@@ -105,7 +111,7 @@ HCOPY	EQU	00010h
 	; umkopieren und starten
 	LD	HL, VSWITCH		; Quelle
 	LD	DE, JUMPI		; Ziel
-	LD	BC, VEND - VSWITCH	; Länge
+	LD	BC, VLENGTH		; Länge
 	LDIR
 	JP	JUMPI
 
@@ -121,7 +127,7 @@ CSWITCH:
 	; Modul auf Adresse C000 schalten
 	LD	A, 2
 	LD	L, 008h		; Schacht
-	LD	D, 0C1h 	; Steuerwort
+	LD	D, MODSEG0 	; Steuerwort
 	CALL	PV1
 	DB	MODU
 
@@ -158,13 +164,14 @@ CCOPY:
 	PUSH	BC
 	LD	B, (IX+11)
 	LD	C, 080h
-	LD	A, 0C1h
+	LD	A, MODSEG0
 	OUT	(C), A
 	POP	BC
 
 	RET
 
 CEND:
+CLENGTH	EQU	CEND - CCOPY
 
 	; Menüwort
 	DB	07Fh, 07Fh
@@ -174,10 +181,11 @@ CEND:
 	; Start über Menü
 MENUSTART:
 	
+SEARCH:
 	; suche eigenen Modulschacht
 	; nicht nötig bei Autostart im Schacht 08
 	LD	BC, 00780h	; Schacht 08
-SEARCH:
+SEARCHNEXT:
 	INC	B
 	LD	A, 0FFh		; Ende erreicht?
 	CP	B
@@ -186,13 +194,13 @@ SEARCH:
 	CP	001h		; Autostartkennung?
 	JR	Z, CHECKON
 	CP	STRUKTB
-	JR	NZ, SEARCH
+	JR	NZ, SEARCHNEXT
 CHECKON:	
 	LD	H, 0B8h		; Modulsteuerwortspeicher
 	LD	L, B
 	LD	A, (HL)
 	BIT	0, A		; Modul eingeschaltet?
-	JR	Z, SEARCH	; nein, weitersuchen
+	JR	Z, SEARCHNEXT	; nein, weitersuchen
 	LD	(IX+11), B	; ja, Modulschacht sichern
 	JR	CSTART
 NOTFOUND:
@@ -202,6 +210,14 @@ NOTFOUND:
         CALL	PV1
         DB  	OSTR
 MSGBYTE DB      'Strukturbyte ', 0
+	LD	A, STRUKTB
+        CALL	PV1
+        DB  	AHEX
+        
+	CALL	PV1
+        DB  	OSTR
+        DB      ' nicht gefunden!', CR, LF, 0
+
 	CALL	PV1
 	DB	ERRM
 	RET
@@ -211,7 +227,7 @@ CSTART:
 	; HCOPY umkopieren
 	LD	HL, CCOPY  		; Quelle
 	LD	DE, JUMPI		; Ziel
-	LD	BC, CEND - CCOPY  	; Länge
+	LD	BC, CLENGTH		; Länge
 	LDIR
 
 	; Fenster initialisieren
@@ -1112,14 +1128,33 @@ NEXTSPC:
 
 
 ; Modulsteuerworte
+
+IF DEFINED M045
 MODBASE	EQU	0C0h		; Modul-Basisadresse
-IF BLOCKS = 256
+MODSEG0 EQU	MODBASE + 001h	; Steuerbyte für 1. Segment
+BLOCKS	EQU	256
 STRUKTB	EQU	070h
 MSGMODU DB	'M045, 32k (4*8k)',0	
 MODCTRL	DB	MODBASE + 001h, MODBASE + 011h
 	DB	MODBASE + 021h, MODBASE + 031h
 ENDIF
-IF BLOCKS = 512
+
+
+IF DEFINED M062_32k
+MODBASE	EQU	0C0h		; Modul-Basisadresse
+MODSEG0 EQU	MODBASE + 001h	; Steuerbyte für 1. Segment
+BLOCKS	EQU	256
+STRUKTB	EQU	0F3h
+MSGMODU DB	'M062, 32k (4*8k)',0	
+MODCTRL	DB	MODBASE + 001h, MODBASE + 005h
+	DB	MODBASE + 009h, MODBASE + 00Dh
+ENDIF
+
+
+IF DEFINED M046 
+MODBASE	EQU	0C0h		; Modul-Basisadresse
+MODSEG0 EQU	MODBASE + 001h	; Steuerbyte für 1. Segment
+BLOCKS 	EQU	512
 STRUKTB	EQU	071h
 MSGMODU DB	'M046, 64k (8*8k)',0	
 MODCTRL	DB	MODBASE + 001h, MODBASE + 005h
@@ -1127,7 +1162,25 @@ MODCTRL	DB	MODBASE + 001h, MODBASE + 005h
 	DB	MODBASE + 021h, MODBASE + 025h
 	DB	MODBASE + 031h, MODBASE + 035h
 ENDIF
-IF BLOCKS = 1024
+
+
+IF DEFINED M062_64k
+MODBASE	EQU	0C0h		; Modul-Basisadresse
+MODSEG0 EQU	MODBASE + 001h	; Steuerbyte für 1. Segment
+BLOCKS	EQU	512
+STRUKTB	EQU	0F3h
+MSGMODU DB	'M062, 64k (8*8k)',0	
+MODCTRL	DB	MODBASE + 001h, MODBASE + 005h
+	DB	MODBASE + 009h, MODBASE + 00Dh
+       	DB	MODBASE + 011h, MODBASE + 015h
+	DB	MODBASE + 019h, MODBASE + 01Dh
+ENDIF
+
+
+IF DEFINED M047
+MODBASE	EQU	0C0h		; Modul-Basisadresse
+MODSEG0 EQU	MODBASE + 001h	; Steuerbyte für 1. Segment
+BLOCKS	EQU	1024
 STRUKTB	EQU	072h
 MSGMODU DB	'M047, 128k (16*8k)',0	
 MODCTRL	DB	MODBASE + 001h, MODBASE + 005h
