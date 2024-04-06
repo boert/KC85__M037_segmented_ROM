@@ -1,9 +1,17 @@
-all: MODUL.BIN
+# Bitte einen Modultyp auswählen
+#MODULTYP = M045
+#MODULTYP = M046
+#MODULTYP = M047
+#MODULTYP = M062_32k
+MODULTYP = M062_64k
 
-MODUL.BIN: romstart.bin romdata.bin directory.bin
-		cat romstart.bin  directory.bin romdata.bin  > MODUL.BIN
+all: MODUL_$(MODULTYP).BIN
+
+MODUL_$(MODULTYP).BIN: romstart.bin romdata.bin directory.bin
+		cat romstart.bin  directory.bin romdata.bin  > MODUL_$(MODULTYP).BIN
 
 romstart.bin: romstart.asm  datetime.inc date.inc  directory.bin 
+		echo -n "$(MODULTYP)  EQU  1"              >  modul.inc
 		pasmo -v romstart.asm romstart.bin romstart.symbol
 
 
@@ -18,7 +26,7 @@ date.inc: FORCE
 		echo -n "', 0"                      >> date.inc
 
 directory.bin:
-		cd helpers && ./create_ROM-Image.py M047 kcc/*.KCC
+		cd helpers && ./create_ROM-Image.py  $(MODULTYP)  kcc_tools/*.KCC
 		mv helpers/*.bin .
 
 FORCE:
