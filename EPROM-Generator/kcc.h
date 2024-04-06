@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>      // uint16_t
 
 class Kcc
 {
