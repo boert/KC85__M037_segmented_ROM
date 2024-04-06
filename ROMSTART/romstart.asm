@@ -21,7 +21,7 @@ include modul.inc
 	; IX + 11 Modulschacht
 
 ; Anzahl der für die ROM-Verwaltung (nur Programm) reservierten Blöcke
-PRGBLOCS	EQU	11
+PRGBLOCS	EQU	12
 
 ; Anzahl der maximal dargestellte Verzeichniseinträge
 MAXENTRY	EQU	18
@@ -43,31 +43,35 @@ ICON_HEIGHT	EQU 	8
 
 PV1     EQU     0F003h 	; Sprungverteiler
 CAOSVER EQU 	0EDFFh 	; CAOS Version (ab 4.1)
+CCTL0	EQU	0B7A6h	; Zeichenbildtablle 20h bis 5Fh
+CCTL1	EQU	0B7A8h	; Zeichenbildtablle 00h-1Fh und 60-7Fh
+CCTL2	EQU	0B7AAh	; Zeichenbildtablle A0h bis DFh
+CCTL3	EQU	0B7ACh	; Zeichenbildtablle 80h-9Fh und E0-FFh
 
 
 ; CAOS Funktionsnummern
 ; bzw. Unterprogramme
-CRT     EQU     000h
-KBD     EQU     004h
-KBDS	EQU	00Ch
-BYE     EQU     00Dh
-KBDZ	EQU	00Eh
-COLORUP	EQU	00Fh
-LOOP	EQU	012h
-ERRM	EQU	019h
-HLHX	EQU	01Ah
-AHEX	EQU	01Ch
-OSTR    EQU     023h
-MODU	EQU	026h
-SPACE	EQU	02Bh
-CRLF	EQU	02Ch
-HOME	EQU	02Dh
-PADR	EQU	034h
-WININ	EQU	03Ch
-WINAK	EQU	03Dh
-LINE	EQU	03Eh
-CSTBT	EQU	042h
-ZKOUT   EQU     045h
+UPCRT	EQU     000h
+UPKBD   EQU     004h
+UPKBDS	EQU	00Ch
+UPBYE   EQU     00Dh
+UPKBDZ	EQU	00Eh
+UPCOLOR	EQU	00Fh
+UPLOOP	EQU	012h
+UPERRM	EQU	019h
+UPHLHX	EQU	01Ah
+UPAHEX	EQU	01Ch
+UPOSTR  EQU     023h
+UPMODU	EQU	026h
+UPSPACE	EQU	02Bh
+UPCRLF	EQU	02Ch
+UPHOME	EQU	02Dh
+UPPADR	EQU	034h
+UPWININ	EQU	03Ch
+UPWINAK	EQU	03Dh
+UPLINE	EQU	03Eh
+UPCSTBT	EQU	042h
+UPZKOUT EQU     045h
 
 ; Sonderzeichen
 BREAK	EQU	003h
@@ -82,8 +86,8 @@ STOP	EQU	013h
 ESC	EQU	01Bh
 SPC	EQU	020h
 
-; VRAM-Zellen
-VRAM    EQU     08000h
+; IRM-Zellen
+IRM     EQU     08000h
 ARGN    EQU     0B781h
 ARG1	EQU	0B782h
 ARG2	EQU	0B784h
@@ -103,6 +107,7 @@ VLENGTH	EQU	VEND - VSWITCH
 HCOPY	EQU	00010h
 
 
+
         ORG     0C000h
 
 	; Code für Autostart in Schacht 08 
@@ -116,20 +121,21 @@ HCOPY	EQU	00010h
 	JP	JUMPI
 
 
+;VSWITCH:
 CSWITCH:
 	; BASIC wegschalten (nur bei 85/3 nötig, bei 85/4 unproblematisch)
 	LD	A, 2
 	LD	L, 02h		; Schacht
 	LD	D, 0		; Steuerwort
 	CALL	PV1
-	DB	MODU
+	DB	UPMODU
 
 	; Modul auf Adresse C000 schalten
 	LD	A, 2
 	LD	L, 008h		; Schacht
 	LD	D, MODSEG0 	; Steuerwort
 	CALL	PV1
-	DB	MODU
+	DB	UPMODU
 
 	LD	(IX+11), L	; Schacht sichern
 
@@ -138,7 +144,7 @@ CSWITCH:
 	LD	L, 004h		; Schacht
 	LD	D, 003h 	; Steuerwort
 	CALL	PV1
-	DB	MODU
+	DB	UPMODU
 
 	JP	CSTART
 
@@ -170,6 +176,7 @@ CCOPY:
 
 	RET
 
+;VEND:
 CEND:
 CLENGTH	EQU	CEND - CCOPY
 
@@ -180,6 +187,15 @@ CLENGTH	EQU	CEND - CCOPY
 
 	; Start über Menü
 MENUSTART:
+
+	; Zeichenbildtabellen
+	; zurücksetzen
+	LD	BC, 0EE00h
+	LD	(CCTL0), BC
+	LD	(CCTL2), BC
+	LD	BC, 0FE00h
+	LD	(CCTL1), BC
+	LD	(CCTL3), BC
 	
 SEARCH:
 	; suche eigenen Modulschacht
@@ -208,18 +224,18 @@ NOTFOUND:
 	; oder Kennbyte (Hardware) passt nicht zu Programm (Software)
 	; oder Modul nicht richtig eingeschaltet
         CALL	PV1
-        DB  	OSTR
+        DB  	UPOSTR
 MSGBYTE DB      'Strukturbyte ', 0
 	LD	A, STRUKTB
         CALL	PV1
-        DB  	AHEX
+        DB  	UPAHEX
         
 	CALL	PV1
-        DB  	OSTR
+        DB  	UPOSTR
         DB      ' nicht gefunden!', CR, LF, 0
 
 	CALL	PV1
-	DB	ERRM
+	DB	UPERRM
 	RET
 
 	; Einsprung für Autostart
@@ -236,12 +252,12 @@ CSTART:
 	LD	DE, 2028h ; Zeilen/Spalten
 	LD	C, L
 	CALL	PV1
-	DB	WININ
+	DB	UPWININ
 
 	; Fenster aktivieren
 	LD	A, 9
 	CALL	PV1
-	DB	WINAK
+	DB	UPWINAK
 
 	; Farbe setzen, so geht es auch gleich auf dem /3er
 	LD	A, 07Ah
@@ -250,7 +266,7 @@ CSTART:
 	; Bildschirm löschen
 	LD  	A, CLS
 	CALL 	PV1
-	DB  	CRT
+	DB  	UPCRT
 
 	
 	; Systeminfo ausgeben
@@ -265,7 +281,7 @@ CSTART:
 
         ; Ausgabe Autor
         CALL	PV1
-        DB  	OSTR
+        DB  	UPOSTR
 AUTHOR	DB 	96, ' B. Lange, KC-Club', 0
 
         LD  	L, 28		; Cursorspalte
@@ -275,7 +291,7 @@ AUTHOR	DB 	96, ' B. Lange, KC-Club', 0
         ; Ausgabe Buildzeit
         LD  	HL, BUILDSTR
         CALL	PV1
-        DB  	ZKOUT
+        DB  	UPZKOUT
 
 
         ; Cursor setzen
@@ -285,7 +301,7 @@ AUTHOR	DB 	96, ' B. Lange, KC-Club', 0
 
         ; Ausgabe Titel
         CALL 	PV1
-        DB  	OSTR
+        DB  	UPOSTR
 MSGTITL DB      'ROM-Kollektion', 0
 
 
@@ -301,7 +317,7 @@ MSGTITL DB      'ROM-Kollektion', 0
         LD  	(CURSO), HL
 
         CALL 	PV1
-        DB  	OSTR
+        DB  	UPOSTR
 MSG853	DB	'KC85/3', 0
         
 
@@ -320,7 +336,7 @@ MSG853	DB	'KC85/3', 0
 	; kein RAM-Modul gefunden
 	; Ausgabe wenig RAM
 	CALL	PV1
-	DB	OSTR
+	DB	UPOSTR
 MSGNRAM	DB	'16k RAM', 0
 	JR	AEND
 
@@ -329,7 +345,7 @@ RAMFOUND:
 	; M022/M011 gefunden
 	LD	B, A		; Schacht wegspeichern
         CALL	PV1
-        DB  	OSTR
+        DB  	UPOSTR
 MSGM022	DB	'32k RAM (M022/M011)', 0
 
 	; M022 oder M011 einschalten
@@ -337,7 +353,7 @@ MODON:	LD	A, 2
 	LD	L, B   		; Schacht
 	LD	D, 043h 	; Steuerwort
 	CALL	PV1
-	DB	MODU
+	DB	UPMODU
 	
 	JR	AEND
 
@@ -349,7 +365,7 @@ A854:
         LD  	(CURSO), HL
 
 	CALL	PV1
-	DB	OSTR
+	DB	UPOSTR
 MSGCAOS	DB	'CAOS ', 0
 
 	LD	A, (CAOSVER)
@@ -360,17 +376,17 @@ MSGCAOS	DB	'CAOS ', 0
 	AND	00Fh
 	ADD	A, 030h
 	CALL	PV1
-	DB	CRT
+	DB	UPCRT
 
 	LD	A, '.'
 	CALL	PV1
-	DB	CRT
+	DB	UPCRT
 	
 	LD	A, (CAOSVER)
 	AND	00Fh
 	ADD	A, 030h
 	CALL	PV1
-	DB	CRT
+	DB	UPCRT
 
 AEND:
         LD  	L,  3		; Cursorspalte
@@ -380,7 +396,7 @@ AEND:
         ; Ausgabe Titel
         LD  	HL, MSGMODU
         CALL 	PV1
-        DB  	ZKOUT
+        DB  	UPZKOUT
 
 
         LD  	L, DIRSPALTE+2	; Cursorspalte
@@ -394,7 +410,7 @@ AEND:
 
         ; Ausgabe Überschrift/Header
         CALL	PV1
-        DB  	OSTR
+        DB  	UPOSTR
 MSGHEAD	DB	'NAME           LOAD ENDE START', 0
 	
 	; Farbe zurückändern
@@ -403,7 +419,7 @@ MSGHEAD	DB	'NAME           LOAD ENDE START', 0
 	INC	(HL)
 
 	CALL	PV1
-	DB	CRLF
+	DB	UPCRLF
 	
 	; Fenster für Vorschau definieren
 	LD	A, 8
@@ -415,7 +431,7 @@ MSGHEAD	DB	'NAME           LOAD ENDE START', 0
 	LD	DE, 0 + (ICON_HEIGHT + 0) << 8 + (ICON_WIDTH + 0)
 	LD	C, L
 	CALL	PV1
-	DB	WININ
+	DB	UPWININ
 
 	; Farbe einstellen
 	LD	A, 2
@@ -423,7 +439,7 @@ MSGHEAD	DB	'NAME           LOAD ENDE START', 0
 	LD	E, 0
 	LD	L, 0fh
 	CALL	PV1
-	DB	COLORUP
+	DB	UPCOLOR
 
 	CALL	CLRICON
 
@@ -450,7 +466,7 @@ DIRNEXT:
 	LD	B, 11		; Anzahl
 NNEXT: 	LD	A, (HL)
 	CALL	PV1
-	DB	CRT
+	DB	UPCRT
 	INC	HL
 	DJNZ	NNEXT
 
@@ -463,7 +479,7 @@ NNEXT: 	LD	A, (HL)
 	LD	D, (HL)		; +13
 	EX	DE, HL		; DE = Ladeadresse
 	CALL	PV1
-	DB	HLHX
+	DB	UPHLHX
 	EX	DE, HL		; HL = Zeiger
 
 	; Endadresse (Loadadresse + Länge)
@@ -474,7 +490,7 @@ NNEXT: 	LD	A, (HL)
 	EX	DE, HL		; HL = Ladeadresse
 	ADD	HL, BC		; HL = Ladeadresse + Länge
 	CALL	PV1
-	DB	HLHX
+	DB	UPHLHX
 	EX	DE, HL		; HL = Zeiger
 	
 	BIT	0, (IY+0)	; Test auf startfähig
@@ -487,7 +503,7 @@ NNEXT: 	LD	A, (HL)
 	LD	D, (HL)		; +17
 	EX	DE, HL		; HL = Startadresse
 	CALL	PV1
-	DB	HLHX
+	DB	UPHLHX
 NOSTART:
 
 	; letzter Eintrag? (MSB ist gesetzt)
@@ -502,7 +518,7 @@ NOSTART:
 	; sonst neue Zeile und
 	; nächster Verzeichniseintrag
 	CALL	PV1
-	DB	CRLF
+	DB	UPCRLF
 	LD	BC, 28
 	ADD	IY, BC
 	JR	DIRNEXT
@@ -519,7 +535,7 @@ KEYWAIT:
 	SET	3, (IY+0)
 	LD	A, CUR		; Pfeil ausgeben
 	CALL	PV1
-	DB	CRT
+	DB	UPCRT
 	RES	3, (IY+0)	; Steuerbyte zurücksetzen
 	
 	CALL	GETDIR		; HL = Zeiger auf Verzeichniseintrag
@@ -532,7 +548,7 @@ KEYWAIT:
         ; auf Taste warten
 KEYIN:
 	CALL 	PV1
-        DB 	KBDZ
+        DB 	UPKBDZ
 	JR	NC, KEYIN
 	
 	; Markierung entfernen
@@ -544,7 +560,7 @@ KEYIN:
         LD  	(CURSO), HL
 
 	CALL	PV1
-	DB	SPACE
+	DB	UPSPACE
 	
 	CALL	CLRICON
 	
@@ -693,8 +709,8 @@ GO_RUN:
 JUMPCAOS:
         ; zurueck in CAOS
         CALL PV1
-        DB  LOOP
-        ;DB  BYE; geht nicht -> fängt bei Autostart sofort von vorn an
+        DB  UPLOOP
+        ;DB  UPBYE; geht nicht -> fängt bei Autostart sofort von vorn an
         ;RET    ; geht auch nicht -> Stack u.U. leer
 
 
@@ -766,7 +782,7 @@ CLEARSCR:
 	; Bildschirm löschen
 	LD  	A, CLS
 	CALL 	PV1
-	DB  	CRT
+	DB  	UPCRT
 	RET
 
 
@@ -819,8 +835,8 @@ BILD_DA:
 	CALL	ROMCOPY
 
 	; entpacken
-	LD	DE, 00200h
 	LD	HL, 01000h
+	LD	DE, 00200h
 	;   HL: source address (compressed data)
 	;   DE: destination address (decompressing)
 	CALL	dzx7_turbo	; entpacken
@@ -917,7 +933,7 @@ REPIXEL:
 	LD	H, E
 	LD	L, D
 	CALL	PV1
-	DB	PADR
+	DB	UPPADR
 	EX	DE, HL
 	POP	HL
 	RET
@@ -933,7 +949,7 @@ RECOLOR:
 	LD	H, E
 	LD	L, D
 	CALL	PV1
-	DB	PADR
+	DB	UPPADR
 	POP	HL
 	RET
 
@@ -957,7 +973,7 @@ COPYIRM:
 	; schaltet zwischen Pixel & Farbebene um
 COLORSW:
 	CALL	PV1
-	DB	OSTR
+	DB	UPOSTR
 	DB	ESC
 	DB	'9'
 	DB	0
@@ -1019,17 +1035,17 @@ CLRICON:
 	; Fenster setzen
 	LD	A, 8
 	CALL	PV1
-	DB	WINAK
+	DB	UPWINAK
 	
 	; Bildschirm löschen
 	LD  	A, CLS
 	CALL 	PV1
-	DB  	CRT
+	DB  	UPCRT
 	
 	; Fenster zurück
 	LD	A, 9
 	CALL	PV1
-	DB	WINAK
+	DB	UPWINAK
 	
 	RET
 
@@ -1101,7 +1117,7 @@ RAMWARN:
 	RET
 R_ATT:	
       	CALL	PV1
-	DB	OSTR
+	DB	UPOSTR
 MSGATTN	DB	'Achtung, kein RAM4!', 0
 	
 	RET
@@ -1114,7 +1130,7 @@ NSPACE:
 	LD	B, A
 NEXTSPC:
 	CALL	PV1
-	DB	SPACE
+	DB	UPSPACE
 	DJNZ	NEXTSPC
 
 	POP	BC

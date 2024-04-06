@@ -47,7 +47,8 @@ Byte
 
 # für Verwaltungsprogramm reservierte Blöcke
 # reserved blocks for program
-program_blocks = 11
+program_blocks = 12
+
 
 # für Verzeichnis reservierte Blöcke
 # reserved blocks for directory
