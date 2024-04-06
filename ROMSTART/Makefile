@@ -5,10 +5,12 @@
 #MODULTYP = M062_32k
 MODULTYP = M062_64k
 
-all: MODUL_$(MODULTYP).BIN
+BINFILE = MODUL_$(MODULTYP).BIN
 
-MODUL_$(MODULTYP).BIN: romstart.bin romdata.bin directory.bin
-		cat romstart.bin  directory.bin romdata.bin  > MODUL_$(MODULTYP).BIN
+all: $(BINFILE)
+
+$(BINFILE): romstart.bin romdata.bin directory.bin
+		cat romstart.bin  directory.bin romdata.bin  > $(BINFILE)
 
 romstart.bin: romstart.asm  datetime.inc date.inc  directory.bin 
 		echo -n "$(MODULTYP)  EQU  1"              >  modul.inc
@@ -36,8 +38,9 @@ clean:
 		rm -f romstart.symbol
 		rm -f datetime.inc
 		rm -f date.inc
+		rm -f modul.inc
 
 dist-clean: clean
-		rm -f MODUL.BIN
+		rm -f $(BINFILE)
 		rm -f directory.bin
 		rm -f romdata.bin
