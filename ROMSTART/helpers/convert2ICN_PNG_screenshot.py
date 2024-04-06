@@ -1,45 +1,57 @@
 #! /usr/bin/env python3
 
+"""
+Aufruf: skrip.py  <bild.png> <X> <Y> [show]
+
+bild.png sollte eine Auflösung 320x256 Pixel haben
+
+Werte für X: 0..
+Werte für Y: 0..
+
+"""
+
 from PIL import Image
 import sys
 import os
 import math
 
 NOVIEW = True
-if 'show' in sys.argv[ -3]: 
+if 'show' in sys.argv[ -1]: 
     NOVIEW = False
 
 # Farbkonstanten
 # color constants
+ihi = 255   # hohe Intensität
+ilo = 160   # niedrige Intensität
 fgcolors = [
         [   0,   0,   0], # schwarz
-        [   0,   0, 233], # blau
-        [ 233,   0,   0], # rot
-        [ 233,   0, 233], # purpur
-        [   0, 233,   0], # gruen
-        [   0, 233, 233], # tuerkis
-        [ 233, 233,   0], # gelb
-        [ 233, 233, 233], # weiss
+        [   0,   0, ihi], # blau
+        [ ihi,   0,   0], # rot
+        [ ihi,   0, ihi], # purpur
+        [   0, ihi,   0], # gruen
+        [   0, ihi, ihi], # tuerkis
+        [ ihi, ihi,   0], # gelb
+        [ ihi, ihi, ihi], # weiss
 
         # Vordergrundfarben mit gemischten Primaerfarben
         [   0,   0,   0 ], # schwarz
-        [ 146,   0, 233 ], # violett
-        [ 233, 146,   0 ], # orange
-        [ 233,   0, 146 ], # purpurrot
-        [   0, 233, 146 ], # gruenblau
-        [   0, 146, 233 ], # blaugruen
-        [ 146, 233,   0 ], # gelbgruen
-        [ 233, 233, 233 ]] # weiss
+        [ ilo,   0, ihi ], # violett
+        [ ihi, ilo,   0 ], # orange
+        [ ihi,   0, ilo ], # purpurrot
+        [   0, ihi, ilo ], # gruenblau
+        [   0, ilo, ihi ], # blaugruen
+        [ ilo, ihi,   0 ], # gelbgruen
+        [ ihi, ihi, ihi ]] # weiss
 
 bgcolors = [
         [   0,   0,   0], # schwarz
-        [   0,   0, 146], # blau
-        [ 146,   0,   0], # rot
-        [ 146,   0, 146], # purpur
-        [   0, 146,   0], # gruen
-        [   0, 146, 146], # tuerkis
-        [ 146, 146,   0], # gelb
-        [ 146, 146, 146]] # weiss
+        [   0,   0, ilo], # blau
+        [ ilo,   0,   0], # rot
+        [ ilo,   0, ilo], # purpur
+        [   0, ilo,   0], # gruen
+        [   0, ilo, ilo], # tuerkis
+        [ ilo, ilo,   0], # gelb
+        [ ilo, ilo, ilo]] # weiss
 
 
 # Hilfsfunktionen
@@ -116,20 +128,23 @@ pic = pic.convert( 'RGB')
 if not NOVIEW:
     factor = 3
     picshow = pic.resize(( pic.width * factor, pic.height * factor))
-    picshow.show()
+    #picshow.show()
 
 
 
 # Auswahl aus Kommandozeile (x y)
 try:
-    left = int( sys.argv[ -2])
-    top  = int( sys.argv[ -1])
+    left = int( sys.argv[ 2])
+    top  = int( sys.argv[ 3])
 except:
     left = 0
     top = 0
 
+
 width  = 14
 height = 8
+
+print( "use crop box: %i, %i - %i, %i" % ( left, top, left+width, top+height))
 
 pic_icon = pic.crop( box = ( left*8, top*8, (left+width)*8, (top+height)*8))
 
@@ -145,16 +160,16 @@ icon = []
 icon.append( height)
 icon.append( width)
 
-"""
-colors = set()
+if False:
+    colors = set()
 # check number of colors
-for x in range( pic.width):
-    for y in range( pic.height):
-        color = pic.getpixel(( x, y))
-        colors.add( color)
-print( len( colors), colors)
-sys.exit( 0)
-"""
+    for x in range( pic.width):
+        for y in range( pic.height):
+            color = pic.getpixel(( x, y))
+            colors.add( color)
+    print( len( colors), colors)
+    sys.exit( 0)
+
 
 # pixel and color
 colors = []
@@ -165,12 +180,15 @@ for x in range( pic_icon.width >> 3):
         bgset = set()
         for bit in range( 8):
             rgb = pic_icon.getpixel(( x * 8 + bit, y))
+            #print( rgb, "    ", end="")
             fgindex = get_fgcolor_index( rgb)
             fgset.add( fgindex)
             bgindex = get_bgcolor_index( rgb)
             bgset.add( bgindex)
+            #print( fgindex, bgindex, "    ", end="")
         fgset.discard( -1)
         bgset.discard( -1)
+        #print( bgset, fgset, "    ", end="")
         if len( fgset) > 1:
             fgset = fgset.difference( bgset)
         if len( bgset) > 1:
@@ -181,12 +199,14 @@ for x in range( pic_icon.width >> 3):
             bgset.add( 0)
         fgcol = fgset.pop()
         bgcol = bgset.pop()
+        #print( fgcol, bgcol, "    ", end="")
         colors.append(( fgcol << 3) + bgcol)
         
         for bit in range( 8):
             if fgcol == get_fgcolor_index( pic_icon.getpixel(( x * 8 + bit, y))):
                 byte += 1 << ( 7 - bit)
         icon.append( byte)
+        #print( byte, fgcol, bgcol, "    ", end="")
 icon += colors
 
 iconfilename = os.path.splitext( filename)[ 0] + '.ICN'
