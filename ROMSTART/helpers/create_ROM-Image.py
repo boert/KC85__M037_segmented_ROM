@@ -128,14 +128,18 @@ modultype = modultype.upper()
 
 if modultype == 'M045':
     maxblocks = 256
+elif modultype == 'M062_32K':
+    maxblocks = 256
 elif modultype == 'M046':
+    maxblocks = 512
+elif modultype == 'M062_64K':
     maxblocks = 512
 elif modultype == 'M047':
     maxblocks = 1024
 else:
     print( "Modul type %s not supported!" % modultype)
     print( "%s <Modul-type> <KCC-Files>" % ( sys.argv[ 0]))
-    print( "valid Modul-types: M045, M046, M047")
+    print( "valid Modul-types: M045, M046, M047, M062_32k, M062_64k")
     sys.exit( -2)
 
 directory = bytearray()
