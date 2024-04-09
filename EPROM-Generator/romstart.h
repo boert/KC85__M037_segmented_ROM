@@ -31,6 +31,8 @@ class Romstart : public QMainWindow, public Ui::MainWindow
         void set_M045();
         void set_M046();
         void set_M047();
+        void set_M062_32k();
+        void set_M062_64k();
 
         void add_files();
         void remove_file( int);
