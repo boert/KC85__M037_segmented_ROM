@@ -6,6 +6,8 @@
         <file>binarys/romstartm045.bin</file>
         <file>binarys/romstartm046.bin</file>
         <file>binarys/romstartm047.bin</file>
+        <file>binarys/romstartm062_32k.bin</file>
+        <file>binarys/romstartm062_64k.bin</file>
         <file>icons/preview.png</file>
         <file>icons/Symbol.jpg</file>
     </qresource>

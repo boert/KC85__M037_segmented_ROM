@@ -47,28 +47,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="rb_M045">
-          <property name="text">
-           <string>M045</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="rb_M046">
-          <property name="text">
-           <string>M046</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="rb_M047">
-          <property name="text">
-           <string>M047</string>
-          </property>
-         </widget>
+         <widget class="QComboBox" name="cb_modul"/>
         </item>
         <item>
          <spacer name="horizontalSpacer_2">
@@ -410,7 +389,7 @@
             <item>
              <widget class="QLabel" name="lbl_eprom">
               <property name="text">
-               <string>EPROM-Typ:</string>
+               <string>IC-Typ:</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

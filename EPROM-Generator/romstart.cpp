@@ -1,7 +1,8 @@
 /*
- * (c) 2020 Bert Lange
+ * (c) 2020, 2024 Bert Lange
  *
  * EPROM-Generator für M037-Module (M045/M046/M047)
+ * und M062 (32k/64k)
  *
  * Klasse für das eigentliche Hauptfenster
  */
@@ -20,7 +21,7 @@ Romstart::Romstart( QMainWindow *parent) : QMainWindow( parent)
 
     // status Bar
     this->setStatusBar( &m_status);
-    m_copy_message.setText( "V1.1, © Bert Lange 12/2020, ZX7 by Einar Saukas 2012");
+    m_copy_message.setText( "V1.2, © Bert Lange 2020-2024, ZX7 by Einar Saukas 2012");
     m_status.addPermanentWidget( &m_copy_message);
 
     // hide toolbar
@@ -35,9 +36,13 @@ Romstart::Romstart( QMainWindow *parent) : QMainWindow( parent)
     pb_eprom->setIcon( QIcon( ":/icons/EPROM.png"));
     pb_quit->setIcon( QIcon( ":/icons/OFF.png"));
 
-    connect( rb_M045, &QPushButton::clicked, this, &Romstart::set_M045);
-    connect( rb_M046, &QPushButton::clicked, this, &Romstart::set_M046);
-    connect( rb_M047, &QPushButton::clicked, this, &Romstart::set_M047);
+    // fill combo-box
+    for( int index = 0; index < m_modul_list.size(); index++)
+    {
+        cb_modul->addItem( m_modul_list.at( index));
+    }
+    
+    connect( cb_modul, QOverload<int>::of( &QComboBox::currentIndexChanged), this, &Romstart::select_modul);
     connect( pb_addfile, SIGNAL( clicked()), this, SLOT( add_files()));
     //connect( pb_addfile, &QPushButton::clicked, this, &Romstart::add_files); // geht nicht
     connect( &m_delegate, &Delegate::removeButtonPressed, this, &Romstart::remove_file);
@@ -88,23 +93,18 @@ Romstart::~Romstart()
 }
 
 
-void Romstart::set_M045()
+void Romstart::select_modul( int index)
 {
-    m_modul.set_type( M045);
-    update_modul_labels();
-}
-
-
-void Romstart::set_M046()
-{
-    m_modul.set_type( M046);
-    update_modul_labels();
-}
-
-
-void Romstart::set_M047()
-{
-    m_modul.set_type( M047);
+    //qDebug() << "Index: " << index;
+    //qDebug() << cb_modul->currentText();
+    switch( index)
+    {
+        case 0: m_modul.set_type( M045);     break;
+        case 1: m_modul.set_type( M046);     break;
+        case 2: m_modul.set_type( M047);     break;
+        case 3: m_modul.set_type( M062_32k); break;
+        case 4: m_modul.set_type( M062_64k); break;
+    }
     update_modul_labels();
 }
 
@@ -114,16 +114,37 @@ void Romstart::update_modul_labels()
     QString capa;
     capa = QString( "Kapazität: %1 kByte").arg( m_modul.get_size() / 1024, 3);
     lbl_capa->setText( capa);
-    lbl_epromtyp->setText( QString::fromStdString( m_modul.get_eprom()));
-
+    lbl_epromtyp->setText( QString::fromStdString( m_modul.get_eprom_name()));
+        
     int epromblocksize;
     epromblocksize =  m_modul.get_blocks();
     lc_blocks->display( epromblocksize);
-    epromblocksize /= 4;
-    pr_eprom_1->setMaximum( epromblocksize);
-    pr_eprom_2->setMaximum( epromblocksize);
-    pr_eprom_3->setMaximum( epromblocksize);
-    pr_eprom_4->setMaximum( epromblocksize);
+
+    int count;
+    count = m_modul.get_eprom_count();
+    epromblocksize /= count;
+
+    if( count == 4)
+    {
+        pr_eprom_1->setMaximum( epromblocksize);
+        pr_eprom_2->setMaximum( epromblocksize);
+        pr_eprom_3->setMaximum( epromblocksize);
+        pr_eprom_4->setMaximum( epromblocksize);
+        // alle einblenden
+        lbl_eprom_1->setVisible( 1); pr_eprom_1->setFixedWidth( 25);
+        lbl_eprom_2->setVisible( 1); pr_eprom_2->setVisible( 1);
+        lbl_eprom_3->setVisible( 1); pr_eprom_3->setVisible( 1);
+        lbl_eprom_4->setVisible( 1); pr_eprom_4->setVisible( 1);
+    }
+    if( count == 1)
+    {
+        pr_eprom_1->setMaximum( epromblocksize);
+        lbl_eprom_1->setVisible( 0); pr_eprom_1->setFixedWidth( 118);
+        // 2-4 ausblenden
+        lbl_eprom_2->setVisible( 0); pr_eprom_2->setVisible( 0);
+        lbl_eprom_3->setVisible( 0); pr_eprom_3->setVisible( 0);
+        lbl_eprom_4->setVisible( 0); pr_eprom_4->setVisible( 0);
+    }
     recalcBlocks();
 }
 
@@ -238,7 +259,11 @@ void Romstart::recalcBlocks()
     }
 
     int epromsum = totalblocks;
-    int epromsize = m_modul.get_blocks() / 4;
+    int epromcount = m_modul.get_eprom_count();
+    
+    int epromsize;
+    epromsize = m_modul.get_blocks() / epromcount;
+
     if( epromsum > epromsize)
     {
         pr_eprom_1->setValue( epromsize);
@@ -315,7 +340,7 @@ void Romstart::generate_EPROM()
     }
 
     // Einzeldateien erstellen
-    if( filename.size() > 0)
+    if(( filename.size() > 0) && ( m_modul.get_eprom_count() > 1))
     {
         int single_size = m_modul.get_size() / 4;
         QByteArray part0 = eprom.mid( 0 * single_size, single_size);
