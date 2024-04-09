@@ -51,4 +51,23 @@ ROMSTART vom 5.12.2020
 
 ![Screenshot](M047__14_Spiele_KC853.png)
 
+## M062__7_Tools_KC854
+
+Ein paar kleine Demos und Tools für den KC85/4 bzw. /5
+
+ROMSTART vom 9.4.2024
+
+* DEMO
+* FADEN97
+* FPROB (Farben probieren)
+* MTEST85 (Speichertest)
+* RAMTEST3 (Speichertest)
+* REFRESH1 (Refreshtest für M036)
+* WORK (Hex-Editor)
+
+![Screenshot](M062__7_Tools_KC854.png)
+
+
+## Copyright
+
 Das Copyright der Software liegt beim jeweiligen Autor!
