@@ -2,7 +2,7 @@
 Die Software dient zum Erzeugen von EPROM-Inhalten für KC85-Module vom
 Typ M045/M046/M047. Die EPROM-Software ist auf den Modellen KC85/3 und KC85/4 aus Mühlhausener Produktion, sowie den Umbauten zum KC85/5 lauffähig.
 
-![Screenshot](EPROM-Generator_Screenshot.png)
+![Screenshot](EPROM-Generator_Screenshot_2024.png)
 
 
 # Bedienung
