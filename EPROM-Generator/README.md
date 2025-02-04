@@ -52,7 +52,7 @@ Anschließend wird in der linken oberen Ecke ein Auswahlrechteck dargestellt, we
 
 Eine gute Möglichkeit um an passende Vorschaubilder zu erzeugen, bietet der Emulator JKCEMU [3].
 Der Emulator läßt sich pausieren (Alt-P) und man kann den Bildschriminhalt als Datei sichern (Datei -> Bildschirmausgabe -> als Bilddatei speichern).
-Eine nähere Erklärung für PIC/PIP/PIF-Dateien fondet sich unter [4]. Im Wesentlichen sind es Bildschirmabzüge der jeweiligen KC-Systeme. 
+Eine nähere Erklärung für PIC/PIP/PIF-Dateien findet sich unter [4]. Im Wesentlichen sind es Bildschirmabzüge der jeweiligen KC-Systeme.
 Auf dem System selbst können die Hilfsprogramme PICGEN.KCC oder PICGEN.COM verwendet werden.
 Anmerkung: Um PIC/PIP/PIF-Dateien als Vorschau verwenden zu können, müssen diese unkomprimiert vorliegen.
 
@@ -89,7 +89,7 @@ Zusätzlich werden die Dateien "EPROM_M04?.bin_ROM?" erstellt. Diese sind für d
 
 [3] JKCEMU, Jens Müller, http://www.jens-mueller.org/jkcemu/
 
-[4] KC-Bildformate intern, Ralf Kästner, KC-News 2/95, https://kcclub.de/index.php?option=com_content&view=article&id=123&Itemid=135 
+[4] KC-Bildformate intern, Ralf Kästner, KC-News 2/95, http://kc85.info/index.php/kc-news/265-kc-news-2-1995.html?start=13
 
 
 # Nachtrag 02/2020
@@ -99,3 +99,8 @@ In diesem Fall verdeckt ein aktiviertes ROM-Modul die Interruptroutinen im ROM d
 Workaround: Das ROM-Modul muß auf einem höheren Steckplatz als das M052 Modul betrieben werden. Um dennoch in den Genuß von Autostart zu kommen, läßt sich auf dem verwendeten USB-Stick eine Datei INITIAL.UUU anlegen, welche z.B. folgende Kommandos enthält:
 SWITCH C C1
 ROMSTART
+
+
+# Nachtrag 02/2025
+
+Falls es zu Artefakten bei der Erstellung von Vorschaubildern kommen sollte, gibt es hier weitere [Hinweise]: ICONS.md
