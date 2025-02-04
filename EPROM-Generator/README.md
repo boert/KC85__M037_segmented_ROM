@@ -103,4 +103,4 @@ ROMSTART
 
 # Nachtrag 02/2025
 
-Falls es zu Artefakten bei der Erstellung von Vorschaubildern kommen sollte, gibt es hier weitere [Hinweise]: ICONS.md
+Falls es zu Artefakten bei der Erstellung von Vorschaubildern kommen sollte, gibt es hier weitere ![Hinweise](ICONS.md).
