@@ -104,8 +104,8 @@ bool Delegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyl
                  QMouseEvent * e = (QMouseEvent *)event;
                  QRect r_up = option.rect;
 
-                 int ypos_in_field = e->y() - r_up.y();
-                 //cout << "Clicked! (" << e->y() << ")" << endl;
+                 int ypos_in_field = e->position().y() - r_up.y();
+                 //cout << "Clicked! (" << e->position().y() << ")" << endl;
                  if( r_up.contains( e->pos()))
                  {
                      if( ypos_in_field < 15)
@@ -124,8 +124,8 @@ bool Delegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyl
             case 11:
             {
                  QMouseEvent * e = (QMouseEvent *)event;
-                 int clickX = e->x();
-                 int clickY = e->y();
+                 int clickX = e->position().x();
+                 int clickY = e->position().y();
 
                  QRect r = option.rect;
                  int x, y, w, h;
