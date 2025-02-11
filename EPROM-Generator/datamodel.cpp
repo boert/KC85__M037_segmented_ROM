@@ -148,9 +148,9 @@ QVariant Datamodel::data(const QModelIndex &index, int role) const
             case eRatio:
             case ePreview:
             case eBlocks:
-                return Qt::AlignRight + Qt::AlignVCenter;
+                return QVariant( Qt::AlignRight | Qt::AlignVCenter);
 //          case eArguments:
-//              return Qt::AlignHCenter + Qt::AlignVCenter;
+//              return QVariant( Qt::AlignHCenter | Qt::AlignVCenter);
         }
     }
 
