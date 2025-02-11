@@ -9,7 +9,7 @@
 #define DATAMODEL_H
 
 #include <string>
-#include <QAbstractItemModel>
+#include <QtCore/QAbstractItemModel>
 #include "kcc.h"
 #include "modul.h"
 
